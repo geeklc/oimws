@@ -10,6 +10,11 @@ WORKDIR $SERVER_DIR
 # Set the Go proxy to improve dependency resolution speed
 ENV GOPROXY=https://goproxy.io,direct
 
+# 使用 yum 安装 gcc
+RUN apt-get update && \
+    apt-get install -y gcc && \
+    mkdir -p /data/db
+
 # Copy all files from the current directory into the container
 COPY . .
 
@@ -33,10 +38,7 @@ RUN apk add --no-cache bash
 ENV SERVER_DIR=/oimws
 WORKDIR $SERVER_DIR
 
-# 使用 yum 安装 gcc
-RUN apt-get update && \
-    apt-get install -y gcc && \
-    mkdir -p /data/db
+
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
