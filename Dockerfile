@@ -21,10 +21,7 @@ RUN go install github.com/magefile/mage@v1.15.0
 # Optionally build your application if needed
 RUN mage build
 
-# 使用 yum 安装 gcc
-RUN apt-get update && \
-    apt-get install -y gcc && \
-    mkdir -p /data/db
+
 
 # Using Alpine Linux with Go environment for the final image
 FROM golang:1.21-alpine
@@ -36,6 +33,10 @@ RUN apk add --no-cache bash
 ENV SERVER_DIR=/oimws
 WORKDIR $SERVER_DIR
 
+# 使用 yum 安装 gcc
+RUN apt-get update && \
+    apt-get install -y gcc && \
+    mkdir -p /data/db
 
 # Copy the compiled binaries and mage from the builder image to the final image
 COPY --from=builder $SERVER_DIR/_output $SERVER_DIR/_output
