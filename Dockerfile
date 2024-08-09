@@ -9,7 +9,6 @@ WORKDIR $SERVER_DIR
 
 # Set the Go proxy to improve dependency resolution speed
 ENV GOPROXY=https://goproxy.io,direct
-ENV GCGO_ENABLED=0
 
 # Copy all files from the current directory into the container
 COPY . .
@@ -23,8 +22,9 @@ RUN go install github.com/magefile/mage@v1.15.0
 RUN mage build
 
 # 使用 yum 安装 gcc
-RUN yum -y install gcc
-RUN mkdir -p /data/db
+RUN apt-get update && \
+    apt-get install -y gcc && \
+    mkdir -p /data/db
 
 # Using Alpine Linux with Go environment for the final image
 FROM golang:1.21-alpine
@@ -51,4 +51,4 @@ COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 RUN go get github.com/openimsdk/gomake@v0.0.13
 
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
+ENTRYPOINT ["sh", "-c", "export CGO_ENABLED=0 && mage start && tail -f /dev/null"]
