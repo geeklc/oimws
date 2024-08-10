@@ -16,7 +16,7 @@ COPY . .
 RUN go mod download
 
 # 安装gcc
-RUN apk add --no-cache --update gcc
+RUN apk add --no-cache --update gcc g++ musl-dev
 
 # Install Mage to use for building the application
 RUN go install github.com/magefile/mage@v1.15.0
