@@ -10,21 +10,19 @@ WORKDIR $SERVER_DIR
 # Set the Go proxy to improve dependency resolution speed
 ENV GOPROXY=https://goproxy.io,direct
 
-# 使用 yum 安装 gcc
-RUN apt-get update && \
-    apt-get install -y gcc && \
-    mkdir -p /data/db
-
 # Copy all files from the current directory into the container
 COPY . .
 
 RUN go mod download
 
+# 安装gcc
+RUN apk add --no-cache --update gcc
+
 # Install Mage to use for building the application
 RUN go install github.com/magefile/mage@v1.15.0
 
 # Optionally build your application if needed
-RUN mage build
+RUN export CGO_ENABLED=1 && mage build
 
 
 
@@ -53,5 +51,7 @@ COPY --from=builder $SERVER_DIR/go.sum $SERVER_DIR/
 
 RUN go get github.com/openimsdk/gomake@v0.0.13
 
+
+
 # Set the command to run when the container starts
-ENTRYPOINT ["sh", "-c", "export CGO_ENABLED=0 && mage start && tail -f /dev/null"]
+ENTRYPOINT ["sh", "-c", "mage start && tail -f /dev/null"]
